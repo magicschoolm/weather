@@ -1,0 +1,499 @@
+/* ============================================================
+   Weather app — "celestial instrument"
+   Deep night sky that slowly wheels overhead, with a glass-and-
+   brass readout panel sitting quietly in front of it.
+
+   Drop this in as src/App.css (replaces your current one).
+   Star layers use ::before / ::after on html, body and #root,
+   so you don't need to add any markup.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Jost:wght@300;400;500&display=swap');
+
+:root {
+  /* Sky */
+  --sky-deep:    #05070f;
+  --sky-mid:     #0b1020;
+  --sky-violet:  #151032;
+
+  /* Panel */
+  --glass:       rgba(255, 255, 255, 0.045);
+  --glass-edge:  rgba(232, 216, 178, 0.16);
+
+  /* Ink */
+  --ink:         #f2f4f8;
+  --ink-soft:    rgba(242, 244, 248, 0.62);
+  --ink-faint:   rgba(242, 244, 248, 0.34);
+
+  /* The one warm note against all that blue */
+  --brass:       #e8d8b2;
+  --brass-dim:   rgba(232, 216, 178, 0.45);
+
+  --hairline:    rgba(232, 216, 178, 0.14);
+
+  --serif: 'Bodoni Moda', 'Didot', 'Playfair Display', Georgia, serif;
+  --sans:  'Jost', 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  font-family: var(--sans);
+  color: var(--ink);
+  background:
+    radial-gradient(1200px 800px at 70% -10%, #1b1440 0%, transparent 60%),
+    radial-gradient(900px 700px at 10% 110%, #0d2036 0%, transparent 55%),
+    linear-gradient(170deg, var(--sky-mid) 0%, var(--sky-deep) 45%, var(--sky-violet) 100%);
+  background-attachment: fixed;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ------------------------------------------------------------
+   Moonglow — static, just gives the sky a light source
+   ------------------------------------------------------------ */
+html::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(520px 520px at 82% 14%, rgba(232, 216, 178, 0.10), transparent 70%),
+    radial-gradient(760px 620px at 18% 84%, rgba(90, 140, 220, 0.08), transparent 70%);
+}
+
+/* ------------------------------------------------------------
+   Starfield
+   Three layers on 150vmax squares, centred and rotated. A square
+   that big always covers the viewport diagonal, so the edges
+   never swing into view. Different speeds give it parallax.
+   ------------------------------------------------------------ */
+body::before,
+body::after,
+#root::before {
+  content: "";
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 150vmax;
+  height: 150vmax;
+  margin: -75vmax 0 0 -75vmax;
+  pointer-events: none;
+  z-index: 0;
+  will-change: transform;
+}
+
+/* Layer 1 — dust. Faint, dense, slowest. */
+body::before {
+  background-image:
+    radial-gradient(1px 1px at 12% 18%, rgba(255,255,255,.55), transparent),
+    radial-gradient(1px 1px at 27% 62%, rgba(255,255,255,.40), transparent),
+    radial-gradient(1px 1px at 41% 9%,  rgba(255,255,255,.50), transparent),
+    radial-gradient(1px 1px at 55% 77%, rgba(255,255,255,.35), transparent),
+    radial-gradient(1px 1px at 68% 31%, rgba(255,255,255,.55), transparent),
+    radial-gradient(1px 1px at 79% 88%, rgba(255,255,255,.40), transparent),
+    radial-gradient(1px 1px at 90% 44%, rgba(255,255,255,.45), transparent),
+    radial-gradient(1px 1px at 8%  71%, rgba(255,255,255,.35), transparent),
+    radial-gradient(1px 1px at 34% 39%, rgba(255,255,255,.50), transparent),
+    radial-gradient(1px 1px at 62% 55%, rgba(255,255,255,.35), transparent),
+    radial-gradient(1px 1px at 73% 12%, rgba(255,255,255,.45), transparent),
+    radial-gradient(1px 1px at 96% 68%, rgba(255,255,255,.40), transparent);
+  background-size: 260px 260px;
+  opacity: .7;
+  animation: wheel 620s linear infinite;
+}
+
+/* Layer 2 — the main sky. */
+body::after {
+  background-image:
+    radial-gradient(1.4px 1.4px at 16% 26%, rgba(255,255,255,.95), transparent),
+    radial-gradient(1.2px 1.2px at 31% 71%, rgba(214,230,255,.80), transparent),
+    radial-gradient(1.6px 1.6px at 47% 14%, rgba(255,255,255,.90), transparent),
+    radial-gradient(1.2px 1.2px at 58% 49%, rgba(255,244,222,.75), transparent),
+    radial-gradient(1.4px 1.4px at 72% 83%, rgba(255,255,255,.85), transparent),
+    radial-gradient(1.2px 1.2px at 86% 22%, rgba(206,226,255,.80), transparent),
+    radial-gradient(1.6px 1.6px at 93% 61%, rgba(255,255,255,.90), transparent),
+    radial-gradient(1.2px 1.2px at 5%  52%, rgba(255,255,255,.70), transparent),
+    radial-gradient(1.4px 1.4px at 23% 95%, rgba(255,248,232,.80), transparent),
+    radial-gradient(1.2px 1.2px at 64% 33%, rgba(255,255,255,.75), transparent);
+  background-size: 420px 420px;
+  opacity: .85;
+  animation: wheel 380s linear infinite;
+}
+
+/* Layer 3 — the few bright ones, and the only layer that twinkles. */
+#root::before {
+  background-image:
+    radial-gradient(2.2px 2.2px at 21% 37%, rgba(255,255,255,1), transparent),
+    radial-gradient(2px 2px   at 44% 79%, rgba(255,240,214,.95), transparent),
+    radial-gradient(2.4px 2.4px at 67% 18%, rgba(255,255,255,1), transparent),
+    radial-gradient(2px 2px   at 88% 57%, rgba(212,232,255,.95), transparent),
+    radial-gradient(2.2px 2.2px at 11% 88%, rgba(255,255,255,.95), transparent);
+  background-size: 680px 680px;
+  animation:
+    wheel 470s linear infinite,
+    twinkle 5.5s ease-in-out infinite alternate;
+}
+
+@keyframes wheel {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes twinkle {
+  from { opacity: .45; }
+  to   { opacity: 1; }
+}
+
+/* ------------------------------------------------------------
+   One shooting star, every 14 seconds or so.
+   Idle for most of the cycle so it stays a surprise.
+   ------------------------------------------------------------ */
+#root::after {
+  content: "";
+  position: fixed;
+  top: 12%;
+  left: 78%;
+  width: 140px;
+  height: 1px;
+  pointer-events: none;
+  z-index: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.9) 70%, #fff 100%);
+  opacity: 0;
+  transform: rotate(28deg) translate3d(0, 0, 0);
+  animation: shoot 14s ease-in infinite;
+}
+
+@keyframes shoot {
+  0%, 88%   { opacity: 0; transform: rotate(28deg) translate3d(0, 0, 0); }
+  90%       { opacity: 1; }
+  100%      { opacity: 0; transform: rotate(28deg) translate3d(-520px, 0, 0); }
+}
+
+/* ------------------------------------------------------------
+   The panel
+   ------------------------------------------------------------ */
+#root {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.container {
+  position: relative;
+  z-index: 1;
+  width: min(380px, 100%);
+  padding: 30px 34px 34px;
+  text-align: center;
+
+  border-radius: 20px;
+  border: 1px solid var(--glass-edge);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.07) 0%, rgba(255,255,255,.02) 40%, rgba(255,255,255,.035) 100%);
+  backdrop-filter: blur(22px) saturate(140%);
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .18),
+    inset 0 -1px 0 rgba(0, 0, 0, .25),
+    0 30px 70px -20px rgba(0, 0, 0, .75),
+    0 0 90px -40px rgba(232, 216, 178, .35);
+}
+
+/* ------------------------------------------------------------
+   Search
+   ------------------------------------------------------------ */
+.input-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 5px 5px 18px;
+  margin-bottom: 26px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, .10);
+  background: rgba(8, 12, 24, .45);
+  transition: border-color .25s ease, background .25s ease;
+}
+
+.input-container:focus-within {
+  border-color: var(--brass-dim);
+  background: rgba(8, 12, 24, .62);
+}
+
+.cityInput {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: .95rem;
+  font-weight: 300;
+  letter-spacing: .01em;
+  padding: 10px 0;
+}
+
+.cityInput::placeholder {
+  color: var(--ink-faint);
+}
+
+.search-icon {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  cursor: pointer;
+  background: rgba(232, 216, 178, .12);
+  border: 1px solid rgba(232, 216, 178, .20);
+  transition: background .2s ease, transform .2s ease;
+}
+
+.search-icon:hover {
+  background: rgba(232, 216, 178, .22);
+}
+
+.search-icon:active {
+  transform: scale(.94);
+}
+
+.search-icon img {
+  width: 16px;
+  height: 16px;
+  /* Your searchicon.png is probably dark — this makes it read on glass.
+     Delete this line if your icon is already light. */
+  filter: brightness(0) invert(1);
+  opacity: .85;
+}
+
+/* ------------------------------------------------------------
+   Weather icon + temperature
+   ------------------------------------------------------------ */
+.image {
+  margin-bottom: 4px;
+}
+
+.image img {
+  width: 132px;
+  height: 132px;
+  object-fit: contain;
+  filter: drop-shadow(0 12px 26px rgba(120, 165, 255, .30));
+}
+
+.temp {
+  font-family: var(--serif);
+  font-size: clamp(3.6rem, 16vw, 5rem);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -.02em;
+  color: var(--ink);
+  text-shadow: 0 0 40px rgba(255, 255, 255, .18);
+}
+
+.location {
+  font-family: var(--serif);
+  font-size: 1.6rem;
+  font-weight: 400;
+  margin-top: 14px;
+  letter-spacing: .01em;
+}
+
+.country {
+  position: relative;
+  font-size: .78rem;
+  font-weight: 300;
+  letter-spacing: .22em;
+  color: var(--brass);
+  margin-top: 6px;
+  padding-bottom: 20px;
+}
+
+/* the one brass hairline */
+.country::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: 46px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--brass-dim), transparent);
+}
+
+/* ------------------------------------------------------------
+   Coordinates — reads like a navigation fix
+   ------------------------------------------------------------ */
+.cord {
+  display: flex;
+  justify-content: center;
+  margin: 22px 0 24px;
+}
+
+.coordinate {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+  padding: 0 14px;
+}
+
+.coordinate + .coordinate {
+  border-left: 1px solid var(--hairline);
+}
+
+.coordinate .label {
+  font-size: .68rem;
+  font-weight: 300;
+  letter-spacing: .12em;
+  color: var(--ink-faint);
+}
+
+.coordinate .value {
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------------
+   Humidity / wind
+   ------------------------------------------------------------ */
+.data-container {
+  display: flex;
+  padding-top: 22px;
+  border-top: 1px solid var(--hairline);
+}
+
+.element {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  column-gap: 12px;
+  padding: 0 10px;
+  text-align: left;
+}
+
+.element + .element {
+  border-left: 1px solid var(--hairline);
+}
+
+.icon {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  opacity: .9;
+  /* Uncomment if humidity.png / wind.png are dark:
+  filter: brightness(0) invert(1); */
+}
+
+.data {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+/* Your wind block renders an empty .data div — this keeps it from
+   punching a hole in the layout. (Also see the JSX note below.) */
+.data:empty {
+  display: none;
+}
+
+.humidity-percentage,
+.wind-percentage {
+  font-size: 1.05rem;
+  font-weight: 400;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.text {
+  font-size: .68rem;
+  font-weight: 300;
+  letter-spacing: .1em;
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+
+/* Fallback alignment for the wind block, whose number and label are
+   direct children of .element instead of sitting inside .data.
+   32px icon + 12px gap = 44px offset, so they line up with humidity. */
+.element > .wind-percentage,
+.element > .text {
+  flex: 0 0 calc(100% - 44px);
+  margin-left: auto;
+}
+
+/* ------------------------------------------------------------
+   States (see note — you'll need to render these)
+   ------------------------------------------------------------ */
+.city-not-found,
+.loading {
+  font-size: .85rem;
+  font-weight: 300;
+  letter-spacing: .04em;
+  color: var(--ink-soft);
+  padding: 40px 0;
+}
+
+.city-not-found {
+  color: #f0b6a8;
+}
+
+/* ------------------------------------------------------------
+   Focus + motion preferences
+   ------------------------------------------------------------ */
+:focus-visible {
+  outline: 2px solid var(--brass-dim);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before,
+  body::after,
+  #root::before,
+  #root::after {
+    animation: none;
+  }
+  #root::after { opacity: 0; }
+  * { transition-duration: .01ms !important; }
+}
+
+/* ------------------------------------------------------------
+   Small screens
+   ------------------------------------------------------------ */
+@media (max-width: 420px) {
+  .container {
+    padding: 24px 22px 28px;
+    border-radius: 18px;
+  }
+  .image img { width: 108px; height: 108px; }
+  .location  { font-size: 1.4rem; }
+  .element   { padding: 0 6px; column-gap: 9px; }
+  .element > .wind-percentage,
+  .element > .text { flex-basis: calc(100% - 41px); }
+}
